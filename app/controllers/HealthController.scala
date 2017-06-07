@@ -14,4 +14,3 @@ class HealthController @Inject() extends Controller {
     Ok("overall_status=good")
   }
 }
-q
