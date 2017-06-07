@@ -1,7 +1,7 @@
 import javax.inject._
 
-import play.api._
-import play.api.http.HttpFilters
+import com.octanner.logging.filters.PlatformLoggingFilter
+import play.api.http.DefaultHttpFilters
 
 /**
  * This class configures filters that run on every request. This
@@ -16,11 +16,5 @@ import play.api.http.HttpFilters
  * each response.
  */
 @Singleton
-class Filters @Inject() (
-  env: Environment) extends HttpFilters {
-
-  override val filters = {
-    Seq.empty
-  }
-
-}
+class Filters @Inject()(platformLoggingFilter: PlatformLoggingFilter)
+  extends DefaultHttpFilters(platformLoggingFilter)

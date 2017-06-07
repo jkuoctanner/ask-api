@@ -1,3 +1,5 @@
+import sbt.Keys.libraryDependencies
+
 name := """web"""
 
 version := "1.0-SNAPSHOT"
@@ -24,6 +26,7 @@ libraryDependencies += jdbc
 libraryDependencies += cache
 libraryDependencies += ws
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
+libraryDependencies += "com.octanner.logging" % "logging-scala" % "0.4.5"
 libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.0.0"
 
 coverageExcludedPackages := "<empty>;Reverse.*;views.*;router.*;database.*"
