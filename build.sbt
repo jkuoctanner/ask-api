@@ -1,5 +1,3 @@
-import sbt.Keys.libraryDependencies
-
 name := """web"""
 
 version := "1.0-SNAPSHOT"
