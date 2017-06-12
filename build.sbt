@@ -24,6 +24,6 @@ libraryDependencies += jdbc
 libraryDependencies += cache
 libraryDependencies += ws
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
-libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.0.0"
+libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.1.2"
 
 coverageExcludedPackages := "<empty>;Reverse.*;views.*;router.*;database.*"
