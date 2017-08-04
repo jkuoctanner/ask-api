@@ -5,3 +5,5 @@
 # An example controller showing how to use dependency injection
 GET     /octhc                      controllers.HealthController.health
 
+GET     /schema                     controllers.ApiHelpController.getResources
+

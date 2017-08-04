@@ -4,11 +4,19 @@ This is a starter application that shows how Play works.  Please see the documen
 
 ## Running
 
-Run this using [sbt](http://www.scala-sbt.org/).  If you downloaded this project from http://www.playframework.com/download then you'll find a prepackaged version of sbt in the project directory:
-
 ```
-sbt run
+./run.local run
 ```
 
 And then go to http://localhost:9000 to see the running web application.
 
+
+Libraries added with this seed project:
+
+[Tracer Library](https://github.com/octanner/ws-tracer-client)
+
+[Metrics Logger](https://github.com/octanner/metrics-logger)
+
+[Platform Auth](https://github.com/octanner/platform-service-auth-lib)
+
+[Swagger](https://github.com/swagger-api/swagger-play/tree/master/play-2.6/swagger-play2)

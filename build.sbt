@@ -1,10 +1,14 @@
+import scalariform.formatter.preferences._
+import com.typesafe.sbt.SbtScalariform
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+
 name := """web"""
 
 version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.2"
 
 credentials ++= {
   (sys.env.get("OCT_VAULT_SHARED_READ_ARTIFACTORY_USERNAME"), sys.env.get("OCT_VAULT_SHARED_READ_ARTIFACTORY_PASSWORD")) match {
@@ -20,11 +24,26 @@ resolvers ++= Seq(
   "OCTanner plugins snapshots" at "https://artifactory.octanner.net/plugins-snapshots/"
 )
 
-libraryDependencies += jdbc
-libraryDependencies += cache
-libraryDependencies += ws
-libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
-libraryDependencies += "com.octanner.logging" % "logging-scala" % "0.4.5"
-libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.1.2"
+coverageMinimum := 80
+coverageFailOnMinimum := true
 
+libraryDependencies += jdbc
+libraryDependencies += ehcache
+libraryDependencies += ws
+libraryDependencies += guice
+libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.+" % Test
+libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.2.+"
+libraryDependencies += "com.octanner" %% "ws-tracer-client-play" % "0.0.1"
+libraryDependencies += "com.octanner.platform" %% "service-auth-play-test" % "1.2.+" % Test
+libraryDependencies += "com.octanner" %% "metrics-logger-play" % "0.0.+"
+libraryDependencies += "io.swagger" %% "swagger-play2" % "1.6.+"
 coverageExcludedPackages := "<empty>;Reverse.*;views.*;router.*;database.*"
+
+val preferences =
+  ScalariformKeys.preferences := ScalariformKeys.preferences.value
+      .setPreference(AlignSingleLineCaseStatements, true)
+      .setPreference(AlignParameters, true)
+      .setPreference(DoubleIndentConstructorArguments, true)
+      .setPreference(DanglingCloseParenthesis, Preserve)
+
+SbtScalariform.scalariformSettings ++ Seq(preferences)

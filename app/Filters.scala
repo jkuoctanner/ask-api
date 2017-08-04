@@ -1,6 +1,6 @@
 import javax.inject._
 
-import com.octanner.logging.filters.PlatformLoggingFilter
+import com.octanner.filter.TracerFilter
 import play.api.http.DefaultHttpFilters
 
 /**
@@ -16,5 +16,5 @@ import play.api.http.DefaultHttpFilters
  * each response.
  */
 @Singleton
-class Filters @Inject()(platformLoggingFilter: PlatformLoggingFilter)
-  extends DefaultHttpFilters(platformLoggingFilter)
+class Filters @Inject()(tracer: TracerFilter)
+  extends DefaultHttpFilters(tracer)
