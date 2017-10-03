@@ -16,5 +16,5 @@ import play.api.http.DefaultHttpFilters
  * each response.
  */
 @Singleton
-class Filters @Inject()(tracer: TracerFilter)
+class Filters @Inject() (tracer: TracerFilter)
   extends DefaultHttpFilters(tracer)

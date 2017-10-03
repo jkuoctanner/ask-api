@@ -1,6 +1,6 @@
-# Play Scala Starter
+# Alexa Skills API
 
-This is a starter application that shows how Play works.  Please see the documentation at https://www.playframework.com/documentation/latest/Home for more details.
+This is a proof of concept application for working with Amazon's Alexa Skills API
 
 ## Running
 

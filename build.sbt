@@ -2,7 +2,9 @@ import scalariform.formatter.preferences._
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 
-name := """web"""
+import scala.util.Properties
+
+name := """alexa-skills-poc"""
 
 version := "1.0-SNAPSHOT"
 
@@ -10,12 +12,13 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 scalaVersion := "2.12.2"
 
-credentials ++= {
-  (sys.env.get("OCT_VAULT_SHARED_READ_ARTIFACTORY_USERNAME"), sys.env.get("OCT_VAULT_SHARED_READ_ARTIFACTORY_PASSWORD")) match {
-    case (Some(user), Some(token)) => Seq(Credentials("Artifactory Realm", "artifactory.octanner.net",user,token))
-    case _ => Seq[Credentials]()
-  }
-}
+credentials ++= Seq(
+  Credentials(
+    "Artifactory Realm",
+    "artifactory.octanner.net",
+    Properties.envOrElse("OCT_VAULT_SHARED_READ_ARTIFACTORY_USERNAME", "readonly"),
+    Properties.envOrElse("OCT_VAULT_SHARED_READ_ARTIFACTORY_PASSWORD", "AP5voKzeXmojG2TFgyHu4J46iuA"))
+)
 
 resolvers ++= Seq(
   "OCTanner releases" at "https://artifactory.octanner.net/releases/",
