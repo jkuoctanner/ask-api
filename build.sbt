@@ -38,7 +38,6 @@ libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.+
 libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.2.+"
 libraryDependencies += "com.octanner" %% "ws-tracer-client-play" % "0.0.1"
 libraryDependencies += "com.octanner.platform" %% "service-auth-play-test" % "1.2.+" % Test
-libraryDependencies += "com.octanner" %% "metrics-logger-play" % "0.0.+"
 libraryDependencies += "io.swagger" %% "swagger-play2" % "1.6.+"
 coverageExcludedPackages := "<empty>;Reverse.*;views.*;router.*;database.*"
 
