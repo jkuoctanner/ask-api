@@ -20,12 +20,12 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
 
     val jsResult = request.body.validate[AlexaIntentRequest]
 
-    processRequest[AlexaIntentRequest](jsResult, createAlexaIntentAction("2961698"))
+    processRequest[AlexaIntentRequest](jsResult, createAlexaIntentAction("2961698", "1543530"))
   }
 
-  private def createAlexaIntentAction(userId: String)(request: AlexaIntentRequest): Future[Result] = {
+  private def createAlexaIntentAction(userId: String, customerId: String)(request: AlexaIntentRequest): Future[Result] = {
     for {
-      answer <- service.handleIntent(userId, request.intents)
+      answer <- service.handleIntent(userId, customerId, request.intents)
     } yield {
       Created(Json.toJson(answer))
     }

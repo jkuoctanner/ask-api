@@ -35,6 +35,7 @@ libraryDependencies += ehcache
 libraryDependencies += ws
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.+" % Test
+libraryDependencies += "com.octanner" % "auth-oc_tanner" % "1.4.4"
 libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.2.+"
 libraryDependencies += "com.octanner" %% "ws-tracer-client-play" % "0.0.1"
 libraryDependencies += "com.octanner.platform" %% "service-auth-play-test" % "1.2.+" % Test
@@ -49,3 +50,5 @@ val preferences =
       .setPreference(DanglingCloseParenthesis, Preserve)
 
 SbtScalariform.scalariformSettings ++ Seq(preferences)
+
+javaOptions in Test ++= Seq("-Dconfig.file=conf/application.test.conf")

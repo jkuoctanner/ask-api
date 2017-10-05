@@ -1,4 +1,8 @@
 import com.google.inject.AbstractModule
+import com.google.inject.name.Names
+import com.octanner.auth.OCTannerAuth
+import com.octanner.auth.impl.{ OCTannerAuthImpl, SecretKey }
+import play.api.{ Configuration, Environment }
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -10,9 +14,15 @@ import com.google.inject.AbstractModule
  * adding `play.modules.enabled` settings to the `application.conf`
  * configuration file.
  */
-class Module extends AbstractModule {
+class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   override def configure() = {
+    bindConstant().annotatedWith(Names.named("VictoriesBaseApiUrl")).to(getConfigValue("victories.base.api.url"))
+    bindConstant.annotatedWith(classOf[SecretKey]).to(getConfigValue("token.hex.key"))
+    bind(classOf[OCTannerAuth]).to(classOf[OCTannerAuthImpl])
   }
 
+  protected def getConfigValue(key: String): String = {
+    configuration.getString(key).getOrElse(throw new IllegalStateException(s"Need to provide $key in configuration"))
+  }
 }

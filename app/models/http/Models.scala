@@ -19,3 +19,19 @@ case class AlexaIntentRequest(intents: String) extends HttpRequest
 object AlexaIntentRequest {
   implicit val alexaIntentRequest = Json.format[AlexaIntentRequest]
 }
+
+case class VictoriesEProductPayload(
+    ccManager:        Boolean,
+    copySender:       Boolean,
+    corporateValueId: Long,
+    eProductId:       Long,
+    message:          String,
+    notifyViewed:     Boolean,
+    programId:        Long,
+    recipientIds:     String,
+    recognitionType:  String,
+    recognizerId:     Long)
+
+object VictoriesEProductPayload {
+  implicit val victoriesEProductPayload = Json.format[VictoriesEProductPayload]
+}
