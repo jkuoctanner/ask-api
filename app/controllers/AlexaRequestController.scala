@@ -13,14 +13,16 @@ import services.AlexaIntentService
 
 @Singleton
 class AlexaRequestController @Inject() (service: AlexaIntentService) extends Controller with RequestProcessor {
-
   val logger = Logger(this.getClass)
 
   def handleRequest = Action.async(parse.json) { request =>
-
     val jsResult = request.body.validate[AlexaIntentRequest]
-
     processRequest[AlexaIntentRequest](jsResult, createAlexaIntentAction("2961698", "1543530"))
+  }
+
+  def testRequest = Action.async(parse.json) { request =>
+    logger.info(request.body.toString())
+    Future(Ok)
   }
 
   private def createAlexaIntentAction(userId: String, customerId: String)(request: AlexaIntentRequest): Future[Result] = {

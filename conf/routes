@@ -8,4 +8,4 @@ GET     /octhc                      controllers.HealthController.health
 GET     /schema                     controllers.ApiHelpController.getResources
 
 POST    /alexa-request-handler      controllers.AlexaRequestController.handleRequest()
-
+POST    /test                       controllers.AlexaRequestController.testRequest()

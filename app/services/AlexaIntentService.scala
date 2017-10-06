@@ -34,9 +34,9 @@ class AlexaIntentService @Inject() (
       response <- wsRequest.post(payload)
     } yield {
       response.status match {
-        case Status.OK => Json.parse(response.json.toString()).as[String]
+        case Status.OK => response.body
         case _ => {
-          logger.error(s"Failed Catalog Service Call : ${response.status}: ${response.body}")
+          logger.info(s"Failed Service Call : ${baseApiUrl}/give/submitEProduct ${response.status}: ${response.body}")
           throw ExternalServiceException("A service call failed")
         }
       }
@@ -45,7 +45,7 @@ class AlexaIntentService @Inject() (
 
   def getToken(systemUserId: String, customerId: String): String = {
     "Bearer " + ocTannerAuth.encodeToken(new OCTannerAuthData()
-      .setClientId("pointstores_service")
+      .setClientId("ask_service")
       .setScopes(util.EnumSet.allOf(classOf[Scope]))
       .setExpires(SmD.from(System.currentTimeMillis() + 1000l * 60l * 60l * 24))
       .setUserId(systemUserId) //system user id 2961723
