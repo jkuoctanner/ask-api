@@ -34,7 +34,8 @@ class AlexaIntentService @Inject() (
       response <- wsRequest.post(payload)
     } yield {
       response.status match {
-        case Status.OK => response.body
+        case Status.OK =>
+          response.body
         case _ => {
           logger.info(s"Failed Service Call : ${baseApiUrl}/give/submitEProduct ${response.status}: ${response.body}")
           throw ExternalServiceException("A service call failed")
