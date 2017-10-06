@@ -9,3 +9,4 @@ GET     /schema                     controllers.ApiHelpController.getResources
 
 POST    /alexa-request-handler      controllers.AlexaRequestController.handleRequest()
 POST    /test                       controllers.AlexaRequestController.testRequest()
+POST    /test2                       controllers.AlexaRequestController.testRequest2()
