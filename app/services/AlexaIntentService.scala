@@ -28,7 +28,7 @@ class AlexaIntentService @Inject() (
   val payload = Json.toJson[VictoriesEProductPayload](eCardData).toString()
 
   def handleIntent(systemUserId: String, customerId: String, intents: String): Future[String] = {
-    val wsRequest = wsClient.url(baseApiUrl + "/give/submitEProduct/")
+    val wsRequest = wsClient.url(baseApiUrl + "/give/submitEProduct")
       .withHeaders(("Authorization", getToken(systemUserId, customerId)), ("Content-Type", "application/json"))
     for {
       response <- wsRequest.post(payload)
