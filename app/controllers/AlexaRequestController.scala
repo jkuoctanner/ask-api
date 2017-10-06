@@ -29,7 +29,8 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
     for {
       answer <- service.handleIntent(userId, customerId, request.intents)
     } yield {
-      Created(Json.toJson(answer))
+      logger.info("response = " + answer)
+      Ok
     }
   }
 }
