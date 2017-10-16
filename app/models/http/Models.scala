@@ -14,9 +14,18 @@ object HttpModels {
 
 sealed trait HttpRequest
 
-case class AlexaIntentRequest(intents: String) extends HttpRequest
+case class AlexaSession(`new`: Boolean, sessionId: String, application: String, user: String)
+case class AlexaSlot(name: String, value: String)
+case class AlexaIntent(name: String, slots: Map[String, AlexaSlot])
+case class AlexaRequest(`type`: String, intent: AlexaIntent)
+
+case class AlexaIntentRequest(session: AlexaSession, request: AlexaRequest) extends HttpRequest
 
 object AlexaIntentRequest {
+  implicit val alexaSessionFormat = Json.format[AlexaSession]
+  implicit val alexaSlot = Json.format[AlexaSlot]
+  implicit val alexaIntent = Json.format[AlexaIntent]
+  implicit val alexaRequestFormat = Json.format[AlexaRequest]
   implicit val alexaIntentRequest = Json.format[AlexaIntentRequest]
 }
 
