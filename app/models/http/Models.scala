@@ -14,8 +14,8 @@ object HttpModels {
 
 sealed trait HttpRequest
 
-case class AlexaSession(`new`: Boolean, sessionId: String, application: String, user: String)
-case class AlexaSlot(name: String, value: String)
+case class AlexaSession(`new`: Boolean, sessionId: String)
+case class AlexaSlot(name: String, value: Option[String])
 case class AlexaIntent(name: String, slots: Map[String, AlexaSlot])
 case class AlexaRequest(`type`: String, intent: Option[AlexaIntent])
 
