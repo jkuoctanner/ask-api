@@ -60,6 +60,6 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
     val speechOutput = "<speak>" + firstNamePrompt + "</speak>"
     //val repromptText = "I can lead you through providing a city and " + "day of the week to get tide information, " + "or you can simply open Tide Pooler and ask a question like, " + "get tide information for Seattle on Saturday. " + "For a list of supported cities, ask what cities are supported. " + whichCityPrompt
     //newAskResponse(speechOutput, true, repromptText, false)
-    Future(Ok(Json.parse("""{"version":"1.0","sessionAttributes":{},"response":{"outputSpeech":{"type":"PlainText","text":"Say the first name"},"card":{},"reprompt":{},"shouldEndSession":false}}""")))
+    Future(Ok(Json.parse("""{"version":"1.0","sessionAttributes":{"test":"xxx"},"response":{"outputSpeech":{"type":"PlainText","text":"Say the first name"},"card":{"type":"Simple","title":"ECard","content":"Say the first name"},"reprompt":{"outputSpeech":{"type":"PlainText","text":"Say the first name"},"shouldEndSession":false}}""")))
   }
 }
