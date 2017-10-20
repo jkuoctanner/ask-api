@@ -14,19 +14,34 @@ object HttpModels {
 
 sealed trait HttpRequest
 
-case class AlexaSession(`new`: Boolean, sessionId: String)
+//For Alexa Request
+case class AlexaSession(`new`: Boolean, sessionId: String, attributes: Map[String, String])
 case class AlexaSlot(name: String, value: Option[String])
 case class AlexaIntent(name: String, slots: Map[String, AlexaSlot])
-case class AlexaRequest(`type`: String, intent: Option[AlexaIntent])
+case class AlexaRequestType(`type`: String, intent: Option[AlexaIntent])
+case class AlexaRequest(session: AlexaSession, request: AlexaRequestType) extends HttpRequest
 
-case class AlexaIntentRequest(session: AlexaSession, request: AlexaRequest) extends HttpRequest
-
-object AlexaIntentRequest {
+object AlexaRequest {
   implicit val alexaSessionFormat = Json.format[AlexaSession]
   implicit val alexaSlot = Json.format[AlexaSlot]
   implicit val alexaIntent = Json.format[AlexaIntent]
-  implicit val alexaRequestFormat = Json.format[AlexaRequest]
-  implicit val alexaIntentRequest = Json.format[AlexaIntentRequest]
+  implicit val alexaRequestFormat = Json.format[AlexaRequestType]
+  implicit val alexaIntentRequest = Json.format[AlexaRequest]
+}
+
+//For Alexa Response
+case class AlexaOutputSpeech(`type`: String, text: String)
+case class AlexaCard(`type`: String, title: String, content: String)
+case class AlexaReprompt(outputSpeech: AlexaOutputSpeech)
+case class AlexaResponseType(outputSpeech: AlexaOutputSpeech, card: AlexaCard, reprompt: AlexaReprompt)
+case class AlexaResponse(version: String, sessionAttributes: Map[String, String], response: AlexaResponseType, shouldEndSession: Boolean)
+
+object AlexaResponse {
+  implicit val alexaOutputSpeech = Json.format[AlexaOutputSpeech]
+  implicit val alexaCard = Json.format[AlexaCard]
+  implicit val alexaReprompt = Json.format[AlexaReprompt]
+  implicit val alexaResponseType = Json.format[AlexaResponseType]
+  implicit val alexaResponse = Json.format[AlexaResponse]
 }
 
 case class VictoriesEProductPayload(
