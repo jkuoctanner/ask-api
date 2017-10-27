@@ -56,7 +56,20 @@ object AlexaDirectiveResponse {
   implicit val alexaDirective = Json.format[AlexaDirective]
   implicit val alexaDirectiveResponse = Json.format[AlexaDirectiveResponse]
 }
+//false,
+//true,
+//8011190,
+//13987799,
+//"Test eCard to Bryan",
+//false,
+//4509251,
+//"2961723",
+//"ECard",
+//2961698 --> Ryan
 
+//brendan => 7242784
+
+//"2961698", "1543530"
 case class VictoriesEProductPayload(
     ccManager:        Boolean,
     copySender:       Boolean,

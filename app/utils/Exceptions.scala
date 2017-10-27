@@ -9,3 +9,4 @@ case class ResourceNotFoundException(message: String) extends ApplicationExcepti
 case class UnprocessableEntityException(message: String) extends ApplicationException("Unable to Process Request", message)
 case class AuthorizationFailedException(message: String) extends ApplicationException("Unable to Process Request", message)
 case class ExternalServiceException(message: String) extends ApplicationException("Internal Service Error", message)
+case class BadRequestException(message: String) extends ApplicationException("Bad Request", message)

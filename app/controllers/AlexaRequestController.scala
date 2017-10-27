@@ -10,16 +10,18 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import services.AlexaIntentService
+import utils.BadRequestException
 
 @Singleton
 class AlexaRequestController @Inject() (service: AlexaIntentService) extends Controller with RequestProcessor {
   val logger = Logger(this.getClass)
   val FIRST_NAME_SLOT = "firstName"
   val LAST_NAME_SLOT = "lastName"
+  val RECIPIENT_SLOT = "Recipient"
 
   def handleRequest = Action.async(parse.json) { request =>
     val jsResult = request.body.validate[AlexaRequest]
-    processRequest[AlexaRequest](jsResult, createAlexaIntentAction("2961698", "1543530"))
+    processRequest[AlexaRequest](jsResult, createAlexaIntentAction("2961698"))
   }
 
   def testRequest = Action.async(parse.json) { request =>
@@ -32,13 +34,41 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
     Future(Ok(Json.parse("""{"version":"1.0","sessionAttributes":{"supportedHoriscopePeriods":{"daily":true,"weekly":false,"monthly":false}},"response":{"outputSpeech":{"type":"PlainText","text":"Today will provide you a new learning opportunity.  Stick with it and the possibilities will be endless. Can I help you with anything else?"},"card":{"type":"Simple","title":"Horoscope","content":"Today will provide you a new learning opportunity.  Stick with it and the possibilities will be endless."},"reprompt":{"outputSpeech":{"type":"PlainText","text":"Can I help you with anything else?"}},"shouldEndSession":true}}""")))
   }
 
-  private def createAlexaIntentAction(userId: String, customerId: String)(request: AlexaRequest): Future[Result] = {
-    for {
-      answer <- service.handleIntent(userId, customerId, "")
-    } yield {
-      logger.info("response = " + answer)
-      Ok
+  private def createAlexaIntentAction(senderSystemUserId: String)(alexaRequest: AlexaRequest): Future[Result] = {
+    alexaRequest.request.`type` match {
+      case "IntentRequest" => {
+        logger.info("IntentRequest ")
+        alexaRequest.request.intent match {
+          case Some(intent) =>
+            if (intent.name.equalsIgnoreCase("GivaAnECard")) {
+              val name = extractRecipientFirstAndLastName(intent)
+              for {
+                answer <- service.handleIntent(senderSystemUserId, name._1, name._2)
+              } yield {
+                logger.info("response = " + answer)
+                Ok
+              }
+            } else {
+              logger.error("Unknown intent called " + intent.name)
+              Future(BadRequest)
+            }
+          case _ =>
+            logger.error("No intent for an IntentRequest")
+            Future(BadRequest)
+        }
+      }
+      case _ =>
+        logger.error("No intent for an IntentRequest")
+        Future(BadRequest)
     }
+  }
+
+  def extractRecipientFirstAndLastName(intent: AlexaIntent): (String, String) = {
+    val fullName = intent.slots.get(RECIPIENT_SLOT).getOrElse(throw BadRequestException("Recipient Slot is not populated")).value.get
+    logger.info(s"Full Name : $fullName")
+    val split = fullName.split(" ")
+    logger.info(s"First Name: ${split.head}; Last Name : ${split.last}")
+    (split.head, split.last)
   }
 
   def brenDialogHandler = Action.async(parse.json) { request =>

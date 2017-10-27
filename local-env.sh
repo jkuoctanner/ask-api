@@ -1,9 +1,12 @@
 #!/bin/bash
 
 export APPLICATION_SECRET="?PIL;OHn:FRDhbhMeafYodnZqlJI=f3>tPF_NC]9lg^EP/g]K9BZMDJTAyaIeEEr"
-export VICTORIES_BASE_API_URL="https://vision-qa.appreciatehub.com/api"
+export VICTORIES_BASE_API_URL="https://vision-dev.appreciatehub.com/api"
 export TOKEN_HEX_KEY=81ca9f21318178682b924246f3812b99c61cb0a7989efabdd4254589b112ea9a
 export SERVICE_CLIENT_ID="pointstore-jam-qa"
 export SERVICE_CLIENT_SECRET="nyXVOKzYl3uiqZl7Yq1VgGcOsKxY2TrvEe68"
 export OAUTH_TOKEN_URL="https://auth-jam-qa.alamoapp.octanner.io/token"
 export OCT_VAULT_TOKENS_PLATFORMJWS_PUBLICKEY="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5PUNucSHRMMOTKiKwYzryjoT9ayE0HDjHmjKOqiXpnreHQUFqG2Ie5IoDynsDhs/s11eJy/lrSbk1/206xMPPOZdzZaNEm/BKwEKwnZKBcR7LMFWVlPC2I5D/qHwR7F8tp47QbAe7A78SYEJqw6TGTutv9oDw4BQirB1QF02iEdVFx9/eivtSJc6j020MXebXx6g92j7jaclQsk6W1iwinaOLCPcCNDIgsVmJOE01zaypWYYH7okHHX7eK56wPBgbzj7Y/COXj+bx9GP+LO9Cm7WfyMKycUGguoA6TQYi7wfZnEgn3g1AZPHKU/YPhX4feV0HKFlpBZySs2EhTcjiQIDAQAB"
+export OCT_VAULT_DB_PERF_LOCATION="jdbc:postgresql://db-edb-ntp-1.dev.octanner.net:5444/ntp"
+export OCT_VAULT_DB_PERF_USERNAME="p42"
+export OCT_VAULT_DB_PERF_PASSWORD="C0nv3rt"

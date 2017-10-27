@@ -1,6 +1,7 @@
 import scalariform.formatter.preferences._
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import sbt.Resolver
 
 import scala.util.Properties
 
@@ -24,16 +25,20 @@ resolvers ++= Seq(
   "OCTanner releases" at "https://artifactory.octanner.net/releases/",
   "OCTanner snapshots" at "https://artifactory.octanner.net/snapshots/",
   "OCTanner plugins releases" at "https://artifactory.octanner.net/plugins-releases/",
-  "OCTanner plugins snapshots" at "https://artifactory.octanner.net/plugins-snapshots/"
+  "OCTanner plugins snapshots" at "https://artifactory.octanner.net/plugins-snapshots/",
+  Resolver.mavenLocal
 )
 
 coverageMinimum := 80
 coverageFailOnMinimum := true
 
 libraryDependencies += jdbc
+libraryDependencies += evolutions
 libraryDependencies += ehcache
 libraryDependencies += ws
 libraryDependencies += guice
+libraryDependencies += "com.typesafe.play" %% "anorm" % "2.5.3"
+libraryDependencies += "org.postgresql" % "postgresql" % "9.4.1208"
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.+" % Test
 libraryDependencies += "com.octanner" % "auth-oc_tanner" % "1.4.4"
 libraryDependencies += "com.octanner.platform" %% "service-auth-play" % "1.2.+"
