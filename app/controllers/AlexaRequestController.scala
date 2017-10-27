@@ -46,7 +46,7 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
                 answer <- service.handleIntent(senderSystemUserId, name._1, name._2)
               } yield {
                 logger.info("response = " + answer)
-                Ok
+                Ok((Json.parse(s"""{"version":"1.0","sessionAttributes":{"supportedHoriscopePeriods":{"daily":true,"weekly":false,"monthly":false}},"response":{"outputSpeech":{"type":"PlainText","text":"An E-card is sent successfully to ${name._1} ${name._2}"},"card":{"type":"Simple","title":"Horoscope","content":"An E-card is sent successfully to ${name._1} ${name._2}"},"reprompt":{"outputSpeech":{"type":"PlainText","text":"Can I help you with anything else?"}},"shouldEndSession":true}}""")))
               }
             } else {
               logger.error("Unknown intent called " + intent.name)
