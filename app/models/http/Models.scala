@@ -18,7 +18,7 @@ sealed trait HttpRequest
 case class AlexaSession(`new`: Boolean, sessionId: String, attributes: Map[String, String])
 case class AlexaSlot(name: String, value: Option[String])
 case class AlexaIntent(name: String, slots: Map[String, AlexaSlot])
-case class AlexaRequestType(`type`: String, intent: Option[AlexaIntent])
+case class AlexaRequestType(`type`: String, intent: Option[AlexaIntent], dialogState: Option[String])
 case class AlexaRequest(session: AlexaSession, request: AlexaRequestType) extends HttpRequest
 
 object AlexaRequest {
@@ -36,12 +36,25 @@ case class AlexaReprompt(outputSpeech: AlexaOutputSpeech)
 case class AlexaResponseType(outputSpeech: AlexaOutputSpeech, card: AlexaCard, reprompt: AlexaReprompt)
 case class AlexaResponse(version: String, sessionAttributes: Map[String, String], response: AlexaResponseType, shouldEndSession: Boolean)
 
+case class AlexaDirectiveSlot(name: String, confirmationStatus: Option[String], value: Option[String])
+case class AlexaUpdatedIntent(name: String, confirmationStatus: String, slots: Map[String, AlexaDirectiveSlot])
+case class AlexaDirective(`type`: String, updatedIntent: AlexaUpdatedIntent)
+case class AlexaDirectiveResponse(version: String, sessionAttributes: Map[String, String], response: AlexaOutputSpeech, shouldEndSession: Boolean, directives: Seq[AlexaDirective])
+
 object AlexaResponse {
   implicit val alexaOutputSpeech = Json.format[AlexaOutputSpeech]
   implicit val alexaCard = Json.format[AlexaCard]
   implicit val alexaReprompt = Json.format[AlexaReprompt]
   implicit val alexaResponseType = Json.format[AlexaResponseType]
   implicit val alexaResponse = Json.format[AlexaResponse]
+  implicit val alexaSlot = Json.format[AlexaSlot]
+}
+object AlexaDirectiveResponse {
+  implicit val alexaOutputSpeech = Json.format[AlexaOutputSpeech]
+  implicit val alexaDirectiveSlot = Json.format[AlexaDirectiveSlot]
+  implicit val alexaUpdatedIntent = Json.format[AlexaUpdatedIntent]
+  implicit val alexaDirective = Json.format[AlexaDirective]
+  implicit val alexaDirectiveResponse = Json.format[AlexaDirectiveResponse]
 }
 
 case class VictoriesEProductPayload(
