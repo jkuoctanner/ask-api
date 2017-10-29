@@ -50,9 +50,9 @@ class DialogController extends Controller with RequestProcessor {
         val slots = Map() + ("firstName" -> AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName)))
         val updatedIntent = AlexaUpdatedIntent("GiveAnECard", "NONE", slots)
         val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
-        val resp = AlexaDirectiveResponse("1.0", false, directives)
+        val resp = Json.toJson(AlexaDirectiveResponse("1.0", false, directives))
         logger.info(resp.toString)
-        Future(Ok(Json.toJson(resp)))
+        Future(Ok(resp))
       case None =>
         logger.error("No intent for first name utterance")
         quitOnError()
@@ -60,9 +60,9 @@ class DialogController extends Controller with RequestProcessor {
   }
 
   def handleInProgressUtterance(alexaRequest: AlexaRequest): Future[Result] = {
-    val resp = AlexaDirectiveResponse("1.0", false, Seq(AlexaDirective("Dialog.Delegate", None)))
+    val resp = Json.toJson(AlexaDirectiveResponse("1.0", false, Seq(AlexaDirective("Dialog.Delegate", None))))
     logger.info(resp.toString)
-    Future(Ok(Json.toJson(resp)))
+    Future(Ok(resp))
   }
 
   def handleCompleted(alexaRequest: AlexaRequest): Future[Result] = {
@@ -75,9 +75,9 @@ class DialogController extends Controller with RequestProcessor {
         val card = AlexaCard("Simple", "ECard", responseQuote)
         val reprompt = AlexaReprompt(outputSpeech)
         val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
-        val resp = AlexaResponse("1.0", Map(), alexaResponseType, true)
+        val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
         logger.info(resp.toString)
-        Future(Ok(Json.toJson(resp)))
+        Future(Ok(resp))
       case None =>
         logger.error("No intent for COMPLETED")
         quitOnError()
@@ -90,8 +90,8 @@ class DialogController extends Controller with RequestProcessor {
     val card = AlexaCard("Simple", "ECard", responseQuote)
     val reprompt = AlexaReprompt(outputSpeech)
     val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
-    val resp = AlexaResponse("1.0", Map(), alexaResponseType, true)
+    val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
     logger.info(resp.toString)
-    Future(Ok(Json.toJson(resp)))
+    Future(Ok(resp))
   }
 }
