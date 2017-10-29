@@ -48,7 +48,7 @@ class DialogController extends Controller with RequestProcessor {
 
         val directive = AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName))
         val slots = Map() + ("firstName" -> AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName)))
-        val updatedIntent = AlexaUpdatedIntent("GiveAnECard", "NONE", slots)
+        val updatedIntent = AlexaUpdatedIntent("AlphaIntent", "NONE", slots)
         val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
         val resp = Json.toJson(AlexaDirectiveResponse("1.0", false, directives))
         logger.info(resp.toString)
