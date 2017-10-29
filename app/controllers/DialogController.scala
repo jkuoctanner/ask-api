@@ -21,16 +21,14 @@ class DialogController extends Controller with RequestProcessor {
     val alexaRequest = request.body.validate[AlexaRequest].get
     alexaRequest.request.`type` match {
       case "IntentRequest" =>
-        if (alexaRequest.request.dialogState.equals("STARTED")) {
-          //STARTED
-          handleFirstNameUtterance(alexaRequest)
-        } else if (!alexaRequest.request.dialogState.equals("COMPLETED")) {
-          //IN_PROGRESS
-          logger.error("Should not be IN_PROGRESS")
-          handleInProgressUtterance(alexaRequest)
-        } else {
-          //COMPLETED
-          handleCompleted(alexaRequest)
+        alexaRequest.request.dialogState match {
+          case Some("STARTED") =>
+            handleFirstNameUtterance(alexaRequest)
+          case Some("IN_PROGRESS") =>
+            logger.error("Should not be IN_PROGRESS")
+            handleInProgressUtterance(alexaRequest)
+          case _ =>
+            handleCompleted(alexaRequest)
         }
     }
   }
