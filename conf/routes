@@ -11,6 +11,6 @@ POST    /alexa-request-handler      controllers.AlexaRequestController.handleReq
 POST    /test                       controllers.AlexaRequestController.testRequest()
 POST    /test2                       controllers.AlexaRequestController.testRequest2()
 
-POST    /dialog                     controllers.AlexaRequestController.brenDialogHandler()
+#POST    /dialog                     controllers.AlexaRequestController.brenDialogHandler()
 
 POST    /alpha                      controllers.DialogController.alpha()

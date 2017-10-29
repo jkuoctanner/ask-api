@@ -25,7 +25,7 @@ class DialogController extends Controller with RequestProcessor {
           case Some("STARTED") =>
             handleFirstNameUtterance(alexaRequest)
           case Some("IN_PROGRESS") =>
-            logger.error("Should not be IN_PROGRESS")
+            logger.info("IN_PROGRESS")
             handleInProgressUtterance(alexaRequest)
           case _ =>
             handleCompleted(alexaRequest)
@@ -50,7 +50,8 @@ class DialogController extends Controller with RequestProcessor {
         val slots = Map() + ("firstName" -> AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName)))
         val updatedIntent = AlexaUpdatedIntent("AlphaIntent", "NONE", slots)
         val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
-        val resp = Json.toJson(AlexaDirectiveResponse("1.0", false, directives))
+        val respType = AlexaDirectiveResponseType(false, directives)
+        val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
         logger.info(resp.toString)
         Future(Ok(resp))
       case None =>
@@ -60,7 +61,8 @@ class DialogController extends Controller with RequestProcessor {
   }
 
   def handleInProgressUtterance(alexaRequest: AlexaRequest): Future[Result] = {
-    val resp = Json.toJson(AlexaDirectiveResponse("1.0", false, Seq(AlexaDirective("Dialog.Delegate", None))))
+    val respType = AlexaDirectiveResponseType(false, Seq(AlexaDirective("Dialog.Delegate", None)))
+    val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
     logger.info(resp.toString)
     Future(Ok(resp))
   }
