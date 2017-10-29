@@ -13,3 +13,4 @@ POST    /test2                       controllers.AlexaRequestController.testRequ
 
 POST    /dialog                     controllers.AlexaRequestController.brenDialogHandler()
 
+POST    /alpha                      controllers.DialogController.alpha()

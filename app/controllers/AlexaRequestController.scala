@@ -120,8 +120,8 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
     val outputSpeech = AlexaOutputSpeech("PlainText", "Say the first name")
     val slots = Map() + ("firstName" -> AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName))) + ("lastName" -> AlexaDirectiveSlot("lastName", Some("NONE"), None))
     val updatedIntent = AlexaUpdatedIntent("GiveAnECard", "NONE", slots)
-    val directives = Seq(AlexaDirective("Dialog.Delegate", updatedIntent))
-    val alexaDirectiveResponse = AlexaDirectiveResponse("1.0", session.attributes, outputSpeech, false, directives)
+    val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
+    val alexaDirectiveResponse = AlexaDirectiveResponse("1.0", false, directives)
     Future(Ok(Json.toJson(alexaDirectiveResponse)))
     //val card = AlexaCard("Simple", "ECard", "Say the first name")
     //val reprompt = AlexaReprompt(outputSpeech)
@@ -135,8 +135,8 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
     val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
     val slots = Map() + ("firstName" -> AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName))) + ("lastName" -> AlexaDirectiveSlot("lastName", Some("NONE"), Some(lastName)))
     val updatedIntent = AlexaUpdatedIntent("GiveAnECard", "NONE", slots)
-    val directives = Seq(AlexaDirective("Dialog.Delegate", updatedIntent))
-    val alexaDirectiveResponse = AlexaDirectiveResponse("1.0", session.attributes, outputSpeech, false, directives)
+    val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
+    val alexaDirectiveResponse = AlexaDirectiveResponse("1.0", false, directives)
     Future(Ok(Json.toJson(alexaDirectiveResponse)))
     //val card = AlexaCard("Simple", "ECard", responseQuote)
     //val reprompt = AlexaReprompt(outputSpeech)
@@ -147,9 +147,9 @@ class AlexaRequestController @Inject() (service: AlexaIntentService) extends Con
   private def getGiveAnECardResponse(session: AlexaSession): Future[Result] = {
     val slots = Map() + ("firstName" -> AlexaDirectiveSlot("firstName", Some("NONE"), None)) + ("lastName" -> AlexaDirectiveSlot("lastName", Some("NONE"), None))
     val updatedIntent = AlexaUpdatedIntent("GiveAnECard", "NONE", slots)
-    val directives = Seq(AlexaDirective("Dialog.Delegate", updatedIntent))
+    val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
     val outputSpeech = AlexaOutputSpeech("PlainText", "Say the first name")
-    val alexaDirectiveResponse = AlexaDirectiveResponse("1.0", session.attributes, outputSpeech, false, directives)
+    val alexaDirectiveResponse = AlexaDirectiveResponse("1.0", false, directives)
     Future(Ok(Json.toJson(alexaDirectiveResponse)))
     //val firstNamePrompt = "Say the first name"
     //val speechOutput = "<speak>" + firstNamePrompt + "</speak>"

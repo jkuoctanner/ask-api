@@ -38,8 +38,8 @@ case class AlexaResponse(version: String, sessionAttributes: Map[String, String]
 
 case class AlexaDirectiveSlot(name: String, confirmationStatus: Option[String], value: Option[String])
 case class AlexaUpdatedIntent(name: String, confirmationStatus: String, slots: Map[String, AlexaDirectiveSlot])
-case class AlexaDirective(`type`: String, updatedIntent: AlexaUpdatedIntent)
-case class AlexaDirectiveResponse(version: String, sessionAttributes: Map[String, String], response: AlexaOutputSpeech, shouldEndSession: Boolean, directives: Seq[AlexaDirective])
+case class AlexaDirective(`type`: String, updatedIntent: Option[AlexaUpdatedIntent])
+case class AlexaDirectiveResponse(version: String, shouldEndSession: Boolean, directives: Seq[AlexaDirective])
 
 object AlexaResponse {
   implicit val alexaOutputSpeech = Json.format[AlexaOutputSpeech]
