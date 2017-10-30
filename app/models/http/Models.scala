@@ -17,7 +17,7 @@ sealed trait HttpRequest
 //For Alexa Request
 case class AlexaSession(`new`: Boolean, sessionId: String, attributes: Map[String, String])
 case class AlexaSlot(name: String, value: Option[String])
-case class AlexaIntent(name: String, slots: Map[String, AlexaSlot])
+case class AlexaIntent(name: String, confirmationStatus: Option[String], slots: Map[String, AlexaSlot])
 case class AlexaRequestType(`type`: String, intent: Option[AlexaIntent], dialogState: Option[String])
 case class AlexaRequest(session: AlexaSession, request: AlexaRequestType) extends HttpRequest
 
