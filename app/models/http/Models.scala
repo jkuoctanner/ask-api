@@ -38,7 +38,7 @@ case class AlexaResponse(version: String, sessionAttributes: Map[String, String]
 
 case class AlexaDirectiveSlot(name: String, confirmationStatus: Option[String], value: Option[String])
 case class AlexaUpdatedIntent(name: String, confirmationStatus: String, slots: Map[String, AlexaDirectiveSlot])
-case class AlexaDirective(`type`: String, updatedIntent: Option[AlexaUpdatedIntent])
+case class AlexaDirective(`type`: String, slotToElicit: Option[String], updatedIntent: Option[AlexaUpdatedIntent])
 case class AlexaDirectiveResponseType(shouldEndSession: Boolean, outputSpeech: Option[AlexaOutputSpeech], directives: Seq[AlexaDirective])
 case class AlexaDirectiveResponse(version: String, sessionAttributes: Map[String, String], response: AlexaDirectiveResponseType)
 
