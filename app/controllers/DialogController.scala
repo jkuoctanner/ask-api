@@ -36,10 +36,40 @@ class DialogController extends Controller with RequestProcessor {
   }
 
   def handleStarted(alexaRequest: AlexaRequest): Future[Result] = {
-    val respType = AlexaDirectiveResponseType(false, None, Seq(AlexaDirective("Dialog.Delegate", None)))
-    val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
-    logger.info(resp.toString)
-    Future(Ok(resp))
+    alexaRequest.request.intent match {
+      case Some(intent) =>
+        if (intent.slots.get(DEPARTMENT_SLOT).isEmpty) {
+          val personName = intent.slots.get(PERSON_NAME_SLOT).get.value.get
+
+          val dName = AlexaDirectiveSlot("personName", Some("NONE"), Some(personName))
+          val dept = AlexaDirectiveSlot("department", Some("NONE"), None)
+          val slots = Map() + ("personName" -> dName) + ("department" -> dept)
+          val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
+          val directives = Seq(AlexaDirective("Dialog.ElicitSlot", Some(updatedIntent)))
+          val outputSpeech = AlexaOutputSpeech("PlainText", "Is the person from Human Resources, or InfoTech or Labs?")
+          val respType = AlexaDirectiveResponseType(false, Some(outputSpeech), directives)
+          val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
+          logger.info(resp.toString)
+          Future(Ok(resp))
+        } else {
+          val personName = intent.slots.get(PERSON_NAME_SLOT).get.value.get
+          val deptVal = intent.slots.get(DEPARTMENT_SLOT).get.value.get
+
+          val dName = AlexaDirectiveSlot("personName", Some("NONE"), Some(personName))
+          val dept = AlexaDirectiveSlot("department", Some("NONE"), Some(deptVal))
+          val slots = Map() + ("personName" -> dName) + ("department" -> dept)
+          val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
+          val directives = Seq(AlexaDirective("Dialog.ConfirmIntent", Some(updatedIntent)))
+          val outputSpeech = AlexaOutputSpeech("PlainText", "I will send an eCard to " + personName + " from " + deptVal + ". Is that OK?")
+          val respType = AlexaDirectiveResponseType(false, Some(outputSpeech), directives)
+          val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
+          logger.info(resp.toString)
+          Future(Ok(resp))
+        }
+      case None =>
+        logger.error("No intent for person name utterance")
+        quitOnError()
+    }
   }
 
   def handleInProgressUtterance(alexaRequest: AlexaRequest): Future[Result] = {
