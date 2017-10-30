@@ -14,8 +14,9 @@ class DialogController extends Controller with RequestProcessor {
   val INTENT_NAME = "BetaIntent"
   val FIRST_NAME_SLOT = "firstName"
   val LAST_NAME_SLOT = "lastName"
+  val PERSON_NAME_SLOT = "personName"
 
-  //Enter a first name
+  //
   def alpha = Action.async(parse.json) { request =>
     logger.info(request.body.toString())
     val alexaRequest = request.body.validate[AlexaRequest].get
@@ -23,7 +24,7 @@ class DialogController extends Controller with RequestProcessor {
       case "IntentRequest" =>
         alexaRequest.request.dialogState match {
           case Some("STARTED") =>
-            handleFirstLastNameUtterance(alexaRequest)
+            handleStarted(alexaRequest)
           case Some("IN_PROGRESS") =>
             logger.info("IN_PROGRESS")
             handleInProgressUtterance(alexaRequest)
@@ -41,15 +42,20 @@ class DialogController extends Controller with RequestProcessor {
 
   //Enter a message, first and last name, and respond with 2 choices of name and workplace. Select one.
 
-  def handleFirstLastNameUtterance(alexaRequest: AlexaRequest): Future[Result] = {
+  def handleStarted(alexaRequest: AlexaRequest): Future[Result] = {
+    val respType = AlexaDirectiveResponseType(false, Seq(AlexaDirective("Dialog.Delegate", None)))
+    val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
+    logger.info(resp.toString)
+    Future(Ok(resp))
+  }
+
+  def handleInProgressUtterance(alexaRequest: AlexaRequest): Future[Result] = {
     alexaRequest.request.intent match {
       case Some(intent) =>
-        val firstName = intent.slots.get(FIRST_NAME_SLOT).get.value.get
-        val lastName = intent.slots.get(LAST_NAME_SLOT).get.value.get
+        val personName = intent.slots.get(PERSON_NAME_SLOT).get.value.get
 
-        val dF = AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName))
-        val dL = AlexaDirectiveSlot("lastName", Some("NONE"), Some(lastName))
-        val slots = Map() + ("firstName" -> dF) + ("lastName" -> dL)
+        val dF = AlexaDirectiveSlot("personName", Some("NONE"), Some(personName))
+        val slots = Map() + ("personName" -> dF)
         val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
         val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
         val respType = AlexaDirectiveResponseType(false, directives)
@@ -57,16 +63,9 @@ class DialogController extends Controller with RequestProcessor {
         logger.info(resp.toString)
         Future(Ok(resp))
       case None =>
-        logger.error("No intent for first last names utterance")
+        logger.error("No intent for person name utterance")
         quitOnError()
     }
-  }
-
-  def handleInProgressUtterance(alexaRequest: AlexaRequest): Future[Result] = {
-    val respType = AlexaDirectiveResponseType(false, Seq(AlexaDirective("Dialog.Delegate", None)))
-    val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
-    logger.info(resp.toString)
-    Future(Ok(resp))
   }
 
   def handleCompleted(alexaRequest: AlexaRequest): Future[Result] = {
@@ -97,5 +96,26 @@ class DialogController extends Controller with RequestProcessor {
     val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
     logger.info(resp.toString)
     Future(Ok(resp))
+  }
+
+  def handleFirstLastNameUtterance(alexaRequest: AlexaRequest): Future[Result] = {
+    alexaRequest.request.intent match {
+      case Some(intent) =>
+        val firstName = intent.slots.get(FIRST_NAME_SLOT).get.value.get
+        val lastName = intent.slots.get(LAST_NAME_SLOT).get.value.get
+
+        val dF = AlexaDirectiveSlot("firstName", Some("NONE"), Some(firstName))
+        val dL = AlexaDirectiveSlot("lastName", Some("NONE"), Some(lastName))
+        val slots = Map() + ("firstName" -> dF) + ("lastName" -> dL)
+        val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
+        val directives = Seq(AlexaDirective("Dialog.Delegate", Some(updatedIntent)))
+        val respType = AlexaDirectiveResponseType(false, directives)
+        val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
+        logger.info(resp.toString)
+        Future(Ok(resp))
+      case None =>
+        logger.error("No intent for first last names utterance")
+        quitOnError()
+    }
   }
 }
