@@ -42,7 +42,8 @@ class DialogController extends Controller with RequestProcessor {
   def handleInProgressUtterance(alexaRequest: AlexaRequest): Future[Result] = {
     alexaRequest.request.intent match {
       case Some(intent) =>
-        if (intent.slots.get(DEPARTMENT_SLOT).isEmpty) {
+        if (intent.slots.get(DEPARTMENT_SLOT).isEmpty ||
+          (intent.slots.get(DEPARTMENT_SLOT).isDefined && intent.slots.get(DEPARTMENT_SLOT).get.value.isEmpty)) {
           val personName = intent.slots.get(PERSON_NAME_SLOT).get.value.get
 
           val dName = AlexaDirectiveSlot("personName", Some("NONE"), Some(personName))
