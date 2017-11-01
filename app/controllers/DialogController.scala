@@ -39,7 +39,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
   }
 
   def handleStarted(alexaRequest: AlexaRequest): Future[Result] = {
-    clearCache()
+    clearCache(4)
     handleInProgressUtterance(alexaRequest)
   }
 
@@ -124,7 +124,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
       }
       j = j + 1
     })
-    txt = txt + ", or 4 None of these?"
+    txt = txt + ", or " + j + " None of these?"
     logger.info("output txt = " + txt)
     txt
   }
@@ -144,14 +144,13 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
         Future(Ok(resp))
       case None =>
         logger.error("Unable to retrieve " + deptNum + " from cache")
-        quit("I do not know who to send the eCard to. Bye.")
+        quit("No eCard sent. Bye.")
     }
   }
 
   def handleCompleted(alexaRequest: AlexaRequest): Future[Result] = {
     alexaRequest.request.intent match {
       case Some(intent) =>
-        val nameSlot = intent.slots.get(PERSON_NAME_SLOT).getOrElse(AlexaSlot("personName", Some("No Name")))
         val deptSlot = intent.slots.get(DEPARTMENT_SLOT).getOrElse(AlexaSlot("department", Some("No Department")))
         val cacheObj = cache.get[Person](deptSlot.value.get)
         cacheObj match {
@@ -165,8 +164,8 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
             logger.info(resp.toString)
             Future(Ok(resp))
           case None =>
-            logger.error("Not found in cache")
-            quit("Error so No ECard sent")
+            logger.warn(deptSlot.value.get + " Not found in cache")
+            quit("No ECard sent")
         }
       case None =>
         logger.error("No intent for COMPLETED")
@@ -175,8 +174,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
   }
 
   def quit(responseQuote: String): Future[Result] = {
-    clearCache()
-    val responseQuote = "Error so No ECard sent"
+    clearCache(4)
     val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
     val card = AlexaCard("Simple", "ECard", responseQuote)
     val reprompt = AlexaReprompt(outputSpeech)
@@ -186,9 +184,9 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
     Future(Ok(resp))
   }
 
-  def clearCache(): Unit = {
-    cache.remove("1")
-    cache.remove("2")
-    cache.remove("3")
+  def clearCache(size: Int): Unit = {
+    for (i <- 1 to size) {
+      cache.remove(String.valueOf(i))
+    }
   }
 }
