@@ -77,7 +77,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
     val random = (Math.random() * 10 % 4).toInt
     logger.info("********************* random = " + random)
     random match {
-      case 0 => Seq(Person("Bryan", "Cannon", "Human Resources"))
+      case 0 => Seq()
       case 1 => Seq(Person("Bryan", "Cannon", "Human Resources"))
       case 2 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryan", "Cannon", "InfoTech"))
       case 3 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryan", "Cannon", "InfoTech"), Person("Bryan", "Cannon", "Labs"))
@@ -153,15 +153,21 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
       case Some(intent) =>
         val nameSlot = intent.slots.get(PERSON_NAME_SLOT).getOrElse(AlexaSlot("personName", Some("No Name")))
         val deptSlot = intent.slots.get(DEPARTMENT_SLOT).getOrElse(AlexaSlot("department", Some("No Department")))
-
-        val responseQuote = "ECard sent to " + nameSlot.value.get + " working in " + deptSlot.value.get
-        val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
-        val card = AlexaCard("Simple", "ECard", responseQuote)
-        val reprompt = AlexaReprompt(outputSpeech)
-        val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
-        val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
-        logger.info(resp.toString)
-        Future(Ok(resp))
+        val cacheObj = cache.get[Person](deptSlot.value.get)
+        cacheObj match {
+          case Some(p) =>
+            val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " working in " + p.department
+            val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
+            val card = AlexaCard("Simple", "ECard", responseQuote)
+            val reprompt = AlexaReprompt(outputSpeech)
+            val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
+            val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
+            logger.info(resp.toString)
+            Future(Ok(resp))
+          case None =>
+            logger.error("Not found in cache")
+            quit("Error so No ECard sent")
+        }
       case None =>
         logger.error("No intent for COMPLETED")
         quit("Error so No ECard sent")
