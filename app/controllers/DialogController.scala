@@ -19,8 +19,8 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
   val LAST_NAME_SLOT = "lastName"
   val PERSON_NAME_SLOT = "personName"
   val DEPARTMENT_SLOT = "department"
+  val NO_ECARD_SENT_BYE_MSG = "No eCard sent. Bye."
 
-  //
   def alpha = Action.async(parse.json) { request =>
     logger.info(request.body.toString())
     val alexaRequest = request.body.validate[AlexaRequest].get
@@ -64,27 +64,29 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
         } else if (intent.confirmationStatus.isDefined && intent.confirmationStatus.get.equals("CONFIRMED")) {
           handleCompleted(alexaRequest)
         } else {
-          quit("Error so No ECard sent")
+          logger.error("Did not match any if else")
+          quit(NO_ECARD_SENT_BYE_MSG)
         }
       case None =>
         logger.error("No intent for person name utterance")
-        quit("Error so No ECard sent")
+        quit(NO_ECARD_SENT_BYE_MSG)
     }
   }
 
   //TODO Call search here.
   def getSearchResults(name: String): Seq[Person] = {
     val random = (Math.random() * 10 % 4).toInt
-    logger.info("********************* random = " + random)
+    logger.info("********************* random result count = " + random)
     random match {
       case 0 => Seq()
       case 1 => Seq(Person("Bryan", "Cannon", "Human Resources"))
-      case 2 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryan", "Cannon", "InfoTech"))
-      case 3 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryan", "Cannon", "InfoTech"), Person("Bryan", "Cannon", "Labs"))
+      case 2 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryant", "Canyon", "InfoTech"))
+      case 3 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryant", "Canyon", "InfoTech"), Person("Brent", "Canton", "Labs"))
     }
   }
 
   def noSearchResults(name: String): Future[Result] = {
+    logger.info("Could not find anyone with the name " + name)
     quit("Could not find anyone with the name " + name)
   }
 
@@ -115,17 +117,16 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
 
   def buildOutputTxtMoreThanOneSearchResult(searchResults: Seq[Person]): String = {
     var j = 1
-    var txt = "Is the person from "
+    var txt = "Is the person "
     searchResults.foreach(p => {
       if (j == 1) {
-        txt = txt + j + " " + p.department
+        txt = txt + j + " " + p.firstName + " " + p.lastName + " from " + p.department
       } else {
-        txt = txt + ", or " + j + " " + p.department
+        txt = txt + ", or " + j + " " + p.firstName + " " + p.lastName + " from " + p.department
       }
       j = j + 1
     })
-    txt = txt + ", or " + j + " None of these?"
-    logger.info("output txt = " + txt)
+    txt = txt + ", or " + j + " None of these? Select a number."
     txt
   }
 
@@ -144,7 +145,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
         Future(Ok(resp))
       case None =>
         logger.error("Unable to retrieve " + deptNum + " from cache")
-        quit("No eCard sent. Bye.")
+        quit(NO_ECARD_SENT_BYE_MSG)
     }
   }
 
@@ -155,7 +156,9 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
         val cacheObj = cache.get[Person](deptSlot.value.get)
         cacheObj match {
           case Some(p) =>
-            val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " working in " + p.department
+            //TODO sent eCard here
+            val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.department +
+              ". " + getQuirkyEndPhrase()
             val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
             val card = AlexaCard("Simple", "ECard", responseQuote)
             val reprompt = AlexaReprompt(outputSpeech)
@@ -165,11 +168,27 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
             Future(Ok(resp))
           case None =>
             logger.warn(deptSlot.value.get + " Not found in cache")
-            quit("No ECard sent")
+            quit(NO_ECARD_SENT_BYE_MSG)
         }
       case None =>
         logger.error("No intent for COMPLETED")
-        quit("Error so No ECard sent")
+        quit(NO_ECARD_SENT_BYE_MSG)
+    }
+  }
+
+  def getQuirkyEndPhrase(): String = {
+    val random = (Math.random() * 100 % 10).toInt
+    random match {
+      case 0 => "Cowabunga!"
+      case 1 => "Im feeling it!"
+      case 2 => "Yum. That was so good!"
+      case 3 => "Ding ding ding ding ding!"
+      case 4 => "Appreciatologist supremo!"
+      case 5 => "Just like milk and cookies!"
+      case 6 => "Hubba hubba hubba hubba hubba!"
+      case 7 => "Gelatto all around!"
+      case 8 => "Its Frebo time!"
+      case _ => "Lets do yoga!"
     }
   }
 
