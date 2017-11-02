@@ -96,10 +96,9 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
   }
 
   def moreThanOneSearchResult(name: String, searchResults: Seq[Person]): Future[Result] = {
-    var i = 1
-    searchResults.foreach(p => {
-      cache.set(i.toString, p)
-      i = i + 1
+    searchResults.foldLeft(1)((i, person) => {
+      cache.set(i.toString, person)
+      i + 1
     })
 
     val dName = AlexaDirectiveSlot("personName", Some("NONE"), Some(name))
@@ -116,18 +115,15 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
   }
 
   def buildOutputTxtMoreThanOneSearchResult(searchResults: Seq[Person]): String = {
-    var j = 1
     var txt = "Is the person "
-    searchResults.foreach(p => {
-      if (j == 1) {
-        txt = txt + j + " " + p.firstName + " " + p.lastName + " from " + p.department
+    for ((person, j) <- searchResults.zipWithIndex) {
+      if (j == 0) {
+        txt = txt + (j + 1) + " " + person.firstName + " " + person.lastName + " from " + person.department
       } else {
-        txt = txt + ", or " + j + " " + p.firstName + " " + p.lastName + " from " + p.department
+        txt = txt + ", or " + (j + 1) + " " + person.firstName + " " + person.lastName + " from " + person.department
       }
-      j = j + 1
-    })
-    txt = txt + ", or " + j + " None of these? Select a number."
-    txt
+    }
+    txt + ", or " + (searchResults.length + 1) + " None of these? Select a number."
   }
 
   def askForIntentConfirmation(deptNum: String): Future[Result] = {
