@@ -2,17 +2,18 @@ package controllers
 
 import javax.inject.Inject
 
-import models.Person
+import models.{ Person, SystemUser }
 import models.http._
 import play.api.Logger
-import play.api.cache.{ SyncCacheApi }
+import play.api.cache.SyncCacheApi
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, Controller, Result }
+import services.AlexaIntentService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DialogController @Inject() (cache: SyncCacheApi) extends Controller with RequestProcessor {
+class DialogController @Inject() (cache: SyncCacheApi, service: AlexaIntentService) extends Controller with RequestProcessor {
   val logger = Logger(this.getClass)
   val INTENT_NAME = "BetaIntent"
   val FIRST_NAME_SLOT = "firstName"
@@ -20,6 +21,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
   val PERSON_NAME_SLOT = "personName"
   val DEPARTMENT_SLOT = "department"
   val NO_ECARD_SENT_BYE_MSG = "No eCard sent. Bye."
+  val SENDER_SYS_USER_ID = "2961698"
 
   def alpha = Action.async(parse.json) { request =>
     logger.info(request.body.toString())
@@ -49,15 +51,19 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
         if (intent.slots.get(DEPARTMENT_SLOT).isEmpty ||
           (intent.slots.get(DEPARTMENT_SLOT).isDefined && intent.slots.get(DEPARTMENT_SLOT).get.value.isEmpty)) {
           val personName = intent.slots.get(PERSON_NAME_SLOT).get.value.get
-          //TODO Call elastic search to get names and departments
-          val searchResults = getSearchResults(personName)
-          if (searchResults.isEmpty) {
-            noSearchResults(personName)
-          } else if (searchResults.length == 1) {
-            oneSearchResult(searchResults.head)
-          } else {
-            moreThanOneSearchResult(personName, searchResults)
+          //Call elastic search to get names and departments
+          val r = for {
+            searchResults <- getSearchResults(personName)
+          } yield {
+            if (searchResults.isEmpty) {
+              noSearchResults(personName)
+            } else if (searchResults.length == 1) {
+              oneSearchResult(searchResults.head)
+            } else {
+              moreThanOneSearchResult(personName, searchResults)
+            }
           }
+          r.flatten
         } else if (intent.confirmationStatus.isEmpty || intent.confirmationStatus.get.equals("NONE")) {
           val deptNum = intent.slots.get(DEPARTMENT_SLOT).get.value.get
           askForIntentConfirmation(deptNum)
@@ -73,8 +79,18 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
     }
   }
 
-  //TODO Call search here.
-  def getSearchResults(name: String): Seq[Person] = {
+  //Call search here.
+  def getSearchResults(name: String): Future[Seq[Person]] = {
+    val nameTuple = service.extractRecipientFirstAndLastName(name)
+    for {
+      sysUsers <- service.searchForRecipients(SENDER_SYS_USER_ID, nameTuple._1, nameTuple._2)
+    } yield {
+      val uptoThree = sysUsers.take(3)
+      //TODO need to get the first name. last name and department from the sysUsers
+      uptoThree.map(s => Person("Bryan", "Cannon", "InfoTech", s.systemUserId, s.customerId, s.employeeId))
+    }
+
+    /*
     val random = (Math.random() * 10 % 4).toInt
     logger.info("********************* random result count = " + random)
     random match {
@@ -82,7 +98,7 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
       case 1 => Seq(Person("Bryan", "Cannon", "Human Resources"))
       case 2 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryant", "Canyon", "InfoTech"))
       case 3 => Seq(Person("Bryan", "Cannon", "Human Resources"), Person("Bryant", "Canyon", "InfoTech"), Person("Brent", "Canton", "Labs"))
-    }
+    }*/
   }
 
   def noSearchResults(name: String): Future[Result] = {
@@ -152,16 +168,20 @@ class DialogController @Inject() (cache: SyncCacheApi) extends Controller with R
         val cacheObj = cache.get[Person](deptSlot.value.get)
         cacheObj match {
           case Some(p) =>
-            //TODO sent eCard here
-            val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.department +
-              ". " + getQuirkyEndPhrase()
-            val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
-            val card = AlexaCard("Simple", "ECard", responseQuote)
-            val reprompt = AlexaReprompt(outputSpeech)
-            val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
-            val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
-            logger.info(resp.toString)
-            Future(Ok(resp))
+            //Send eCard here
+            for {
+              result <- service.sendECard(SENDER_SYS_USER_ID, p.systemUserId.toString, p.customerId)
+            } yield {
+              val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.department +
+                ". " + getQuirkyEndPhrase()
+              val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
+              val card = AlexaCard("Simple", "ECard", responseQuote)
+              val reprompt = AlexaReprompt(outputSpeech)
+              val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
+              val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
+              logger.info(resp.toString)
+              Ok(resp)
+            }
           case None =>
             logger.warn(deptSlot.value.get + " Not found in cache")
             quit(NO_ECARD_SENT_BYE_MSG)
