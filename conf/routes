@@ -7,10 +7,9 @@ GET     /octhc                      controllers.HealthController.health
 
 GET     /schema                     controllers.ApiHelpController.getResources
 
-POST    /alexa-request-handler      controllers.AlexaRequestController.handleRequest()
-POST    /test                       controllers.AlexaRequestController.testRequest()
-POST    /test2                       controllers.AlexaRequestController.testRequest2()
+GET     /solr                       controllers.AlexaRequestController.testRequest(name: String)
 
-#POST    /dialog                     controllers.AlexaRequestController.brenDialogHandler()
+POST    /alexa-request-handler      controllers.AlexaRequestController.handleRequest()
+POST    /test2                      controllers.AlexaRequestController.testRequest2()
 
 POST    /alpha                      controllers.DialogController.alpha()

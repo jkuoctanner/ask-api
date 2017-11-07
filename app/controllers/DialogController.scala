@@ -2,18 +2,21 @@ package controllers
 
 import javax.inject.Inject
 
-import models.{ Person, SystemUser }
+import models.Employee
 import models.http._
 import play.api.Logger
 import play.api.cache.SyncCacheApi
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, Controller, Result }
-import services.AlexaIntentService
+import services.{ EcardService, EmployeeSearchService }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DialogController @Inject() (cache: SyncCacheApi, service: AlexaIntentService) extends Controller with RequestProcessor {
+class DialogController @Inject() (
+    cache:         SyncCacheApi,
+    service:       EcardService,
+    searchService: EmployeeSearchService) extends Controller with RequestProcessor {
   val logger = Logger(this.getClass)
   val INTENT_NAME = "BetaIntent"
   val FIRST_NAME_SLOT = "firstName"
@@ -80,14 +83,11 @@ class DialogController @Inject() (cache: SyncCacheApi, service: AlexaIntentServi
   }
 
   //Call search here.
-  def getSearchResults(name: String): Future[Seq[Person]] = {
-    val nameTuple = service.extractRecipientFirstAndLastName(name)
+  def getSearchResults(name: String): Future[Seq[Employee]] = {
     for {
-      sysUsers <- service.searchForRecipients(SENDER_SYS_USER_ID, nameTuple._1, nameTuple._2)
+      possibleRecipients <- searchService.searchPossibleEmployees(name)
     } yield {
-      val uptoThree = sysUsers.take(3)
-      //TODO need to get the first name. last name and department from the sysUsers
-      uptoThree.map(s => Person("Bryan", "Cannon", "InfoTech", s.systemUserId, s.customerId, s.employeeId))
+      possibleRecipients.take(3)
     }
 
     /*
@@ -106,14 +106,14 @@ class DialogController @Inject() (cache: SyncCacheApi, service: AlexaIntentServi
     quit("Could not find anyone with the name " + name)
   }
 
-  def oneSearchResult(searchResult: Person): Future[Result] = {
+  def oneSearchResult(searchResult: Employee): Future[Result] = {
     cache.set("1", searchResult)
     askForIntentConfirmation("1")
   }
 
-  def moreThanOneSearchResult(name: String, searchResults: Seq[Person]): Future[Result] = {
-    searchResults.foldLeft(1)((i, person) => {
-      cache.set(i.toString, person)
+  def moreThanOneSearchResult(name: String, searchResults: Seq[Employee]): Future[Result] = {
+    searchResults.foldLeft(1)((i, employee) => {
+      cache.set(i.toString, employee)
       i + 1
     })
 
@@ -130,27 +130,27 @@ class DialogController @Inject() (cache: SyncCacheApi, service: AlexaIntentServi
     Future(Ok(resp))
   }
 
-  def buildOutputTxtMoreThanOneSearchResult(searchResults: Seq[Person]): String = {
-    var txt = "Is the person "
-    for ((person, j) <- searchResults.zipWithIndex) {
+  def buildOutputTxtMoreThanOneSearchResult(searchResults: Seq[Employee]): String = {
+    var txt = "Is the employee "
+    for ((employee, j) <- searchResults.zipWithIndex) {
       if (j == 0) {
-        txt = txt + (j + 1) + " " + person.firstName + " " + person.lastName + " from " + person.department
+        txt = txt + (j + 1) + " " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
       } else {
-        txt = txt + ", or " + (j + 1) + " " + person.firstName + " " + person.lastName + " from " + person.department
+        txt = txt + ", or " + (j + 1) + " " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
       }
     }
     txt + ", or " + (searchResults.length + 1) + " None of these? Select a number."
   }
 
   def askForIntentConfirmation(deptNum: String): Future[Result] = {
-    cache.get[Person](deptNum) match {
+    cache.get[Employee](deptNum) match {
       case Some(cachedObj) =>
         val dName = AlexaDirectiveSlot("personName", Some("NONE"), Some(cachedObj.firstName + " " + cachedObj.lastName))
         val dept = AlexaDirectiveSlot("department", Some("NONE"), Some(deptNum))
         val slots = Map() + ("personName" -> dName) + ("department" -> dept)
         val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
         val directives = Seq(AlexaDirective("Dialog.ConfirmIntent", None, Some(updatedIntent)))
-        val outputSpeech = AlexaOutputSpeech("PlainText", "I will send an eCard to " + cachedObj.firstName + " " + cachedObj.lastName + " from " + cachedObj.department + ". Is that OK?")
+        val outputSpeech = AlexaOutputSpeech("PlainText", "I will send an eCard to " + cachedObj.firstName + " " + cachedObj.lastName + " from " + cachedObj.businessUnit + ". Is that OK?")
         val respType = AlexaDirectiveResponseType(false, Some(outputSpeech), directives)
         val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
         logger.info(resp.toString)
@@ -165,14 +165,14 @@ class DialogController @Inject() (cache: SyncCacheApi, service: AlexaIntentServi
     alexaRequest.request.intent match {
       case Some(intent) =>
         val deptSlot = intent.slots.get(DEPARTMENT_SLOT).getOrElse(AlexaSlot("department", Some("No Department")))
-        val cacheObj = cache.get[Person](deptSlot.value.get)
+        val cacheObj = cache.get[Employee](deptSlot.value.get)
         cacheObj match {
           case Some(p) =>
             //Send eCard here
             for {
-              result <- service.sendECard(SENDER_SYS_USER_ID, p.systemUserId.toString, p.customerId)
+              result <- service.sendEcard(SENDER_SYS_USER_ID, p.systemUserId.toString)
             } yield {
-              val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.department +
+              val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.businessUnit +
                 ". " + getQuirkyEndPhrase()
               val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
               val card = AlexaCard("Simple", "ECard", responseQuote)
