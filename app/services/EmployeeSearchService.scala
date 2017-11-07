@@ -26,7 +26,7 @@ class EmployeeSearchService @Inject() (ws: WSClient, @Named("SolrSearchUrl") val
 
   def searchPossibleEmployees(firstName: String, lastName: Option[String]): Future[Seq[Employee]] = {
     val url = if (lastName.isDefined)
-      s"$searchURL?q=first_name_sound:$firstName%20AND%20last_name_sound:$lastName"
+      s"$searchURL?q=first_name_sound:$firstName%20AND%20last_name_sound:${lastName.get}"
     else
       s"$searchURL?q=first_name_sound:$firstName"
 
