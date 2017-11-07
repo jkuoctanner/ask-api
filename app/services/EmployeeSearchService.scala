@@ -16,14 +16,20 @@ class EmployeeSearchService @Inject() (ws: WSClient, @Named("SolrSearchUrl") val
 
   def searchPossibleEmployees(name: String): Future[Seq[Employee]] = {
     val split = name.split(" ")
-    if (split.size < 2)
+    if (split.size < 1)
       Future.successful(Seq())
+    else if (split.size == 1)
+      searchPossibleEmployees(split.head, None)
     else
-      searchPossibleEmployees(split.head, split.last)
+      searchPossibleEmployees(split.head, Some(split.last))
   }
 
-  def searchPossibleEmployees(firstName: String, lastName: String): Future[Seq[Employee]] = {
-    val url = s"$searchURL?q=first_name_sound:$firstName%20AND%20last_name_sound:$lastName"
+  def searchPossibleEmployees(firstName: String, lastName: Option[String]): Future[Seq[Employee]] = {
+    val url = if (lastName.isDefined)
+      s"$searchURL?q=first_name_sound:$firstName%20AND%20last_name_sound:$lastName"
+    else
+      s"$searchURL?q=first_name_sound:$firstName"
+
     ws.url(url)
       .withHttpHeaders(("Accept", "application/json"))
       .get()
