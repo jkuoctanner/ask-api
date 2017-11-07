@@ -18,6 +18,7 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
 
   override def configure() = {
     bindConstant().annotatedWith(Names.named("VictoriesBaseApiUrl")).to(getConfigValue("victories.base.api.url"))
+    bindConstant().annotatedWith(Names.named("SolrSearchUrl")).to(getConfigValue("solr.search.url"))
     bindConstant.annotatedWith(classOf[SecretKey]).to(getConfigValue("token.hex.key"))
     bind(classOf[OCTannerAuth]).to(classOf[OCTannerAuthImpl])
   }
