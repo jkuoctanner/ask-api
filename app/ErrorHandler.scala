@@ -38,7 +38,7 @@ class ErrorHandler @Inject() (cache: SyncCacheApi) extends HttpErrorHandler {
 
   def quit(responseQuote: String): Future[Result] = {
     clearCache(4)
-    val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
+    val outputSpeech = AlexaOutputSpeech("PlainText", Some(responseQuote), None)
     val card = AlexaCard("Simple", "ECard", responseQuote)
     val reprompt = AlexaReprompt(outputSpeech)
     val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)

@@ -30,7 +30,7 @@ object AlexaRequest {
 }
 
 //For Alexa Response
-case class AlexaOutputSpeech(`type`: String, text: String)
+case class AlexaOutputSpeech(`type`: String, text: Option[String], ssml: Option[String])
 case class AlexaCard(`type`: String, title: String, content: String)
 case class AlexaReprompt(outputSpeech: AlexaOutputSpeech)
 case class AlexaResponseType(outputSpeech: AlexaOutputSpeech, card: AlexaCard, reprompt: AlexaReprompt)
