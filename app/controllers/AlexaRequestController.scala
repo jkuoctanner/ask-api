@@ -51,7 +51,7 @@ class AlexaRequestController @Inject() (service: EcardService, searchSvc: Employ
               } yield {
                 logger.info("response = " + answer)
                 val responseQuote = "ECard sent to " + recipient.firstName + " " + recipient.lastName + " from " + recipient.businessUnit
-                val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
+                val outputSpeech = AlexaOutputSpeech("PlainText", Some(responseQuote), None)
                 val card = AlexaCard("Simple", "ECard", responseQuote)
                 val reprompt = AlexaReprompt(outputSpeech)
                 val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)

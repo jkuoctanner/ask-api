@@ -23,7 +23,7 @@ class DialogController @Inject() (
   val LAST_NAME_SLOT = "lastName"
   val PERSON_NAME_SLOT = "personName"
   val DEPARTMENT_SLOT = "department"
-  val NO_ECARD_SENT_BYE_MSG = "No eCard sent. Bye."
+  val NO_ECARD_SENT_BYE_MSG = "No eCard sent. "
   val SENDER_SYS_USER_ID = "2961698"
 
   def alpha = Action.async(parse.json) { request =>
@@ -123,7 +123,7 @@ class DialogController @Inject() (
     val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
     val directives = Seq(AlexaDirective("Dialog.ElicitSlot", Some("department"), Some(updatedIntent)))
     val outTxt = buildOutputTxtMoreThanOneSearchResult(searchResults)
-    val outputSpeech = AlexaOutputSpeech("PlainText", outTxt)
+    val outputSpeech = AlexaOutputSpeech("PlainText", Some(outTxt), None)
     val respType = AlexaDirectiveResponseType(false, Some(outputSpeech), directives)
     val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
     logger.info(resp.toString)
@@ -134,9 +134,9 @@ class DialogController @Inject() (
     var txt = "Is the employee "
     for ((employee, j) <- searchResults.zipWithIndex) {
       if (j == 0) {
-        txt = txt + (j + 1) + " " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
+        txt = txt + (j + 1) + ". " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
       } else {
-        txt = txt + ", or " + (j + 1) + " " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
+        txt = txt + ", or " + (j + 1) + ". " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
       }
     }
     txt + ", or " + (searchResults.length + 1) + " None of these? Select a number."
@@ -150,7 +150,7 @@ class DialogController @Inject() (
         val slots = Map() + ("personName" -> dName) + ("department" -> dept)
         val updatedIntent = AlexaUpdatedIntent(INTENT_NAME, "NONE", slots)
         val directives = Seq(AlexaDirective("Dialog.ConfirmIntent", None, Some(updatedIntent)))
-        val outputSpeech = AlexaOutputSpeech("PlainText", "I will send an eCard to " + cachedObj.firstName + " " + cachedObj.lastName + " from " + cachedObj.businessUnit + ". Is that OK?")
+        val outputSpeech = AlexaOutputSpeech("PlainText", Some("I will send an eCard to " + cachedObj.firstName + " " + cachedObj.lastName + " from " + cachedObj.businessUnit + ". Is that OK?"), None)
         val respType = AlexaDirectiveResponseType(false, Some(outputSpeech), directives)
         val resp = Json.toJson(AlexaDirectiveResponse("1.0", Map(), respType))
         logger.info(resp.toString)
@@ -174,7 +174,7 @@ class DialogController @Inject() (
             } yield {
               val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.businessUnit +
                 ". " + getQuirkyEndPhrase()
-              val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
+              val outputSpeech = AlexaOutputSpeech("PlainText", Some(responseQuote), None)
               val card = AlexaCard("Simple", "ECard", responseQuote)
               val reprompt = AlexaReprompt(outputSpeech)
               val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
@@ -210,13 +210,34 @@ class DialogController @Inject() (
 
   def quit(responseQuote: String): Future[Result] = {
     clearCache(4)
-    val outputSpeech = AlexaOutputSpeech("PlainText", responseQuote)
+    val outputSpeech = getQuitSsmlOutputSpeech(responseQuote)
     val card = AlexaCard("Simple", "ECard", responseQuote)
     val reprompt = AlexaReprompt(outputSpeech)
     val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
     val resp = Json.toJson(AlexaResponse("1.0", Map(), alexaResponseType, true))
     logger.info(resp.toString)
     Future(Ok(resp))
+  }
+
+  def getQuitPlainTextOutputSpeech(responseQuote: String): AlexaOutputSpeech = {
+    val q = responseQuote + getQuirkyQuitPhrase()
+    AlexaOutputSpeech("PlainText", Some(q), None)
+  }
+
+  def getQuitSsmlOutputSpeech(responseQuote: String): AlexaOutputSpeech = {
+    val q = s"""<speak>$responseQuote<say-as interpret-as="interjection">""" + getQuirkyQuitPhrase() + """</say-as></speak>"""
+    AlexaOutputSpeech("SSML", None, Some(q))
+  }
+
+  def getQuirkyQuitPhrase(): String = {
+    val random = (Math.random() * 100 % 5).toInt
+    random match {
+      case 0 => "aw man!"
+      case 1 => "bummer!"
+      case 2 => "cock a doodle doo!"
+      case 3 => "jiminy cricket!"
+      case _ => "dynomite!"
+    }
   }
 
   def clearCache(size: Int): Unit = {
