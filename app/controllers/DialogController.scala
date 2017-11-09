@@ -139,7 +139,7 @@ class DialogController @Inject() (
         txt = txt + ", or " + (j + 1) + ". " + employee.firstName + " " + employee.lastName + " from " + employee.businessUnit
       }
     }
-    txt + ", or " + (searchResults.length + 1) + " None of these? Select a number."
+    txt + ", or " + (searchResults.length + 1) + ". None of these? Select a number."
   }
 
   def askForIntentConfirmation(deptNum: String): Future[Result] = {
