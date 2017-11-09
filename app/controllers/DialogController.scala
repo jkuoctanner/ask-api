@@ -172,9 +172,8 @@ class DialogController @Inject() (
             for {
               result <- service.sendEcard(SENDER_SYS_USER_ID, p.systemUserId.toString)
             } yield {
-              val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.businessUnit +
-                ". " + getQuirkyEndPhrase()
-              val outputSpeech = AlexaOutputSpeech("PlainText", Some(responseQuote), None)
+              val responseQuote = "ECard sent to " + p.firstName + " " + p.lastName + " from " + p.businessUnit + ". "
+              val outputSpeech = getQuirkyEndPhraseSsmlOutputSpeech(responseQuote)
               val card = AlexaCard("Simple", "ECard", responseQuote)
               val reprompt = AlexaReprompt(outputSpeech)
               val alexaResponseType = AlexaResponseType(outputSpeech, card, reprompt)
@@ -192,6 +191,16 @@ class DialogController @Inject() (
     }
   }
 
+  def getQuirkyEndPhrasePlainTextOutputSpeech(responseQuote: String): AlexaOutputSpeech = {
+    val q = responseQuote + getQuirkyEndPhrase()
+    AlexaOutputSpeech("PlainText", Some(q), None)
+  }
+
+  def getQuirkyEndPhraseSsmlOutputSpeech(responseQuote: String): AlexaOutputSpeech = {
+    val q = s"""<speak>$responseQuote""" + getQuirkyEndPhraseSsml() + """</speak>"""
+    AlexaOutputSpeech("SSML", None, Some(q))
+  }
+
   def getQuirkyEndPhrase(): String = {
     val random = (Math.random() * 100 % 10).toInt
     random match {
@@ -205,6 +214,22 @@ class DialogController @Inject() (
       case 7 => "Gelatto all around!"
       case 8 => "Its Frebo time!"
       case _ => "Lets do yoga!"
+    }
+  }
+
+  def getQuirkyEndPhraseSsml(): String = {
+    val random = (Math.random() * 100 % 10).toInt
+    random match {
+      case 0 => """<say-as interpret-as="interjection">dynomite!</say-as>"""
+      case 1 => """<prosody pitch="x-high">Im feeling it!</prosody>"""
+      case 2 => """<say-as interpret-as="interjection">bada bing bada boom!</say-as>"""
+      case 3 => """<say-as interpret-as="interjection">dun dun dun!</say-as>"""
+      case 4 => """<prosody volume="x-loud">Appreciatologist supremo!</prosody>"""
+      case 5 => """<prosody pitch="x-high">Just like milk and cookies!</prosody>"""
+      case 6 => """<say-as interpret-as="interjection">cock a doodle doo!</say-as>"""
+      case 7 => """<say-as interpret-as="interjection">mazel tov!</say-as>"""
+      case 8 => """<say-as interpret-as="interjection">geronimo</say-as>"""
+      case _ => """<prosody volume="x-loud">Gelatto all around!</prosody>"""
     }
   }
 
@@ -230,13 +255,15 @@ class DialogController @Inject() (
   }
 
   def getQuirkyQuitPhrase(): String = {
-    val random = (Math.random() * 100 % 5).toInt
+    val random = (Math.random() * 100 % 6).toInt
     random match {
       case 0 => "aw man!"
       case 1 => "bummer!"
-      case 2 => "cock a doodle doo!"
-      case 3 => "jiminy cricket!"
-      case _ => "dynomite!"
+      case 2 => "eek!"
+      case 3 => "jinx!"
+      case 4 => "oh snap!"
+      case 5 => "ouch!"
+      case _ => "uh oh!"
     }
   }
 
