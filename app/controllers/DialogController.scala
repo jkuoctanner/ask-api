@@ -103,7 +103,7 @@ class DialogController @Inject() (
 
   def noSearchResults(name: String): Future[Result] = {
     logger.info("Could not find anyone with the name " + name)
-    quit("Could not find anyone with the name " + name)
+    quit("Could not find anyone with the name " + name + ". ")
   }
 
   def oneSearchResult(searchResult: Employee): Future[Result] = {
@@ -221,15 +221,15 @@ class DialogController @Inject() (
     val random = (Math.random() * 100 % 10).toInt
     random match {
       case 0 => """<say-as interpret-as="interjection">dynomite!</say-as>"""
-      case 1 => """<prosody pitch="x-high">Im feeling it!</prosody>"""
+      case 1 => """<say-as interpret-as="interjection">cowabunga!</say-as>"""
       case 2 => """<say-as interpret-as="interjection">bada bing bada boom!</say-as>"""
       case 3 => """<say-as interpret-as="interjection">dun dun dun!</say-as>"""
-      case 4 => """<prosody volume="x-loud">Appreciatologist supremo!</prosody>"""
-      case 5 => """<prosody pitch="x-high">Just like milk and cookies!</prosody>"""
+      case 4 => """<say-as interpret-as="interjection">jiminy cricket!</say-as>"""
+      case 5 => """<say-as interpret-as="interjection">wahoo!</say-as>"""
       case 6 => """<say-as interpret-as="interjection">cock a doodle doo!</say-as>"""
       case 7 => """<say-as interpret-as="interjection">mazel tov!</say-as>"""
       case 8 => """<say-as interpret-as="interjection">geronimo</say-as>"""
-      case _ => """<prosody volume="x-loud">Gelatto all around!</prosody>"""
+      case _ => """<say-as interpret-as="interjection">ta da!</say-as>"""
     }
   }
 
