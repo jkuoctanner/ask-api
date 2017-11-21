@@ -13,3 +13,5 @@ POST    /alexa-request-handler      controllers.AlexaRequestController.handleReq
 POST    /test2                      controllers.AlexaRequestController.testRequest2()
 
 POST    /alpha                      controllers.DialogController.alpha()
+
+GET     /futures/:count/delay/:time            controllers.ThreadTestController.blockingThread(count: Int, time: Int)
